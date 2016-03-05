@@ -66,7 +66,13 @@
     tagedit
 
     ;; git integration
-    magit))
+    magit
+
+    ;; ipython
+    ipython
+
+    ;; Python IDE
+    elpy))
 
 ;; On OS X, an Emacs instance started from the graphical user
 ;; interface will have a different environment than a shell in a
@@ -131,3 +137,4 @@
 (load "setup-clojure.el")
 (load "setup-js.el")
 (load "setup-latex.el")
+(load "setup-python.el")
