@@ -69,3 +69,7 @@
 
 ;; no bell
 (setq ring-bell-function 'ignore)
+
+;; split horizontally
+(setq split-height-threshold 0
+      split-width-threshold 0)

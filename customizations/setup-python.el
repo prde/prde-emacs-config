@@ -4,7 +4,7 @@
 
 
 (require 'elpy)
-;;(prelude-require-packages '(elpy jedi))
+;; (prelude-require-packages '(elpy jedi))
 (elpy-enable)
 (elpy-use-ipython)
 (setq elpy-rpc-backend "jedi")
@@ -21,6 +21,9 @@
   (setq elpy-rpc-python-command "python")
   ;; (company-quickhelp-mode)
   )
+
+(defun elpy-rpc--handle-unexpected-line (line)
+  nil)
 
 (setq prelude-personal-python-mode-hook 'prelude-personal-python-mode-defaults)
 
