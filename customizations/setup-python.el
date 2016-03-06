@@ -14,12 +14,11 @@
   ;; Enable elpy mode
   (elpy-mode)
   ;; Jedi backend                                                                                       
-  ;; (jedi:setup)
-  ;; (setq jedi:complete-on-dot t) ;optional                                                               
-  ;; (auto-complete-mode)
-  ;; (jedi:ac-setup)
-  (setq elpy-rpc-python-command "python") 
-  ;; (python-shell-interpreter "ipython")
+  (jedi:setup)
+  (setq jedi:complete-on-dot t)
+  (auto-complete-mode)
+  (jedi:ac-setup)
+  (setq elpy-rpc-python-command "python")
   ;; (company-quickhelp-mode)
   )
 
@@ -34,6 +33,7 @@
  ;; If there is more than one, they won't work right.
  '(company-auto-complete t)
  '(elpy-mode-hook (quote (subword-mode hl-line-mode)))
+ '(elpy-disable-backend-error-display t)
  '(elpy-rpc-python-command "python")
  '(python-shell-interpreter "ipython"))
 (custom-set-faces
