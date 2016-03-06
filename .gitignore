@@ -1,5 +1,6 @@
 .smex-items
 *~$
+*.pyc
 places
 .recentf
 ido.last
