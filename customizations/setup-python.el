@@ -38,6 +38,7 @@
  '(elpy-mode-hook (quote (subword-mode hl-line-mode)))
  '(elpy-disable-backend-error-display t)
  '(elpy-rpc-python-command "python")
+ '(elpy-rpc-timeout 3)
  '(python-shell-interpreter "ipython"))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
