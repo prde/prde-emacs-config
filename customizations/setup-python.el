@@ -16,8 +16,8 @@
   ;; Jedi backend                                                                                       
   (jedi:setup)
   (setq jedi:complete-on-dot t)
-  (auto-complete-mode)
-  (jedi:ac-setup)
+  ;; (auto-complete-mode)
+  ;; (jedi:ac-setup)
   (setq elpy-rpc-python-command "python")
   ;; (company-quickhelp-mode)
   )
