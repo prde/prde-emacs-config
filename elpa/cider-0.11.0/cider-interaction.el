@@ -1442,10 +1442,8 @@ The heavy lifting is done by `cider-load-buffer'."
                                 (when (buffer-file-name)
                                   (file-name-nondirectory
                                    (buffer-file-name))))))
-  (if-let ((buffer (find-buffer-visiting filename)))
-      (cider-load-buffer buffer)
-    (find-file filename)
-    (cider-load-buffer (current-buffer))))
+  (when-let ((buffer (find-buffer-visiting filename)))
+    (cider-load-buffer buffer)))
 
 (defalias 'cider-eval-file 'cider-load-file
   "A convenience alias as some people are confused by the load-* names.")

@@ -416,20 +416,16 @@ With the actual value, the outermost '(not ...)' s-expression is removed."
 (defun cider-test-echo-summary (summary results)
   "Echo SUMMARY statistics for a test run returning RESULTS."
   (nrepl-dbind-response summary (ns test fail error)
-    (if (nrepl-dict-empty-p results)
-        (message (propertize "Ran %s tests, but found no assertions.\bDid you forget to use `is'?"
-                             'cider-test-failure-face)
-                 test)
-      (message (propertize
-                "%sRan %d tests. %d failures, %d errors."
-                'face (cond ((not (zerop error)) 'cider-test-error-face)
-                            ((not (zerop fail))  'cider-test-failure-face)
-                            (t                   'cider-test-success-face)))
-               (concat (if (= 1 ns)     ; ns count from summary
-                           (cider-propertize (car (nrepl-dict-keys results)) 'ns)
-                         (propertize (format "%d namespaces" ns) 'face 'default))
-                       (propertize ": " 'face 'default))
-               test fail error))))
+    (message (propertize
+              "%sRan %d tests. %d failures, %d errors."
+              'face (cond ((not (zerop error)) 'cider-test-error-face)
+                          ((not (zerop fail))  'cider-test-failure-face)
+                          (t                   'cider-test-success-face)))
+             (concat (if (= 1 ns) ; ns count from summary
+                         (cider-propertize (car (nrepl-dict-keys results)) 'ns)
+                       (propertize (format "%d namespaces" ns) 'face 'default))
+                     (propertize ": " 'face 'default))
+             test fail error)))
 
 ;;; Test definition highlighting
 ;; On receipt of test results, failing/erring test definitions are highlighted.
@@ -615,8 +611,6 @@ current ns."
                                 "Rerun failed/erring tests?"))
           (cider-test-rerun-tests))
       (message "No namespace to test in current context"))))
-(define-obsolete-function-alias 'cider-test-run-tests
-  'cider-test-run-ns-tests "0.11.0")
 
 (defun cider-test-run-test ()
   "Run the test at point.

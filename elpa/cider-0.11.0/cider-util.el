@@ -211,9 +211,7 @@ PROP is the name of a text property."
 (defalias 'cider--font-lock-flush
   (if (fboundp 'font-lock-flush)
       #'font-lock-flush
-    (with-no-warnings
-      (lambda (&optional _beg _end)
-        (font-lock-fontify-buffer)))))
+    #'font-lock-fontify-buffer))
 
 (defvar cider--mode-buffers nil
   "A list of buffers for different major modes.")
@@ -222,9 +220,11 @@ PROP is the name of a text property."
   "Return a temp buffer using major-mode MODE.
 This buffer is not designed to display anything to the user. For that, use
 `cider-make-popup-buffer' instead."
-  (setq cider--mode-buffers (seq-filter (lambda (x) (buffer-live-p (cdr x)))
-                                        cider--mode-buffers))
-  (or (cdr (assq mode cider--mode-buffers))
+  (or (let ((b (cdr (assq mode cider--mode-buffers))))
+        (if (buffer-live-p b)
+            b
+          (setq cider--mode-buffers (seq-remove (lambda (x) (eq (car x) mode))
+                                                cider--mode-buffers))))
       (let ((b (generate-new-buffer (format " *cider-temp %s*" mode))))
         (push (cons mode b) cider--mode-buffers)
         (with-current-buffer b
@@ -283,7 +283,6 @@ Unless you specify a BUFFER it will default to the current one."
 (autoload 'pkg-info-version-info "pkg-info.el")
 
 (defvar cider-version)
-(defvar cider-codename)
 
 (defun cider--version ()
   "Retrieve CIDER's version.
@@ -328,20 +327,6 @@ objects."
                 (cons (cider-string-join el (or separator ":")) el)
               (cons el el)))
           candidates))
-
-(defun cider-add-to-alist (symbol car cadr)
-  "Add '(CAR CADR) to the alist stored in SYMBOL.
-If CAR already corresponds to an entry in the alist, destructively replace
-the entry's second element with CADR.
-
-This can be used, for instance, to update the version of an injected
-plugin or dependency with:
-  (cider-add-to-alist 'cider-jack-in-lein-plugins
-                  \"plugin/artifact-name\" \"THE-NEW-VERSION\")"
-  (let ((alist (symbol-value symbol)))
-    (if-let ((cons (assoc car alist)))
-        (setcdr cons (list cadr))
-      (set symbol (cons (list car cadr) alist)))))
 
 (defun cider-namespace-qualified-p (sym)
   "Return t if SYM is namespace-qualified."
