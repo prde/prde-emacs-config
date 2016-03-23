@@ -66,6 +66,9 @@
 (set-cursor-color "#00ff00")
 (setq default-frame-alist '((cursor-color . "#00ff00")))
 
+;; Don't show scrollbars
+(scroll-bar-mode -1)
+
 ;; full path in title bar
 (setq-default frame-title-format "%b (%f)")
 
