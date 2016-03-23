@@ -61,6 +61,11 @@
 ;; No cursor blinking, it's distracting
 (blink-cursor-mode 0)
 
+;; Cursor type and color
+(setq-default cursor-type 'bar)
+(set-cursor-color "#00ff00")
+(setq default-frame-alist '((cursor-color . "#00ff00")))
+
 ;; full path in title bar
 (setq-default frame-title-format "%b (%f)")
 
