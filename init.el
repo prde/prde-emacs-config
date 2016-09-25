@@ -138,3 +138,24 @@
 (load "setup-js.el")
 (load "setup-latex.el")
 (load "setup-python.el")
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(coffee-tab-width 2)
+ '(company-auto-complete t)
+ '(elpy-disable-backend-error-display t)
+ '(elpy-mode-hook (quote (subword-mode hl-line-mode)))
+ '(elpy-rpc-python-command "python")
+ '(elpy-rpc-timeout 3)
+ '(package-selected-packages
+   (quote
+    (markdown-mode markdown-mode+ tagedit smex rainbow-delimiters quack py-yapf projectile pos-tip paredit magit ipython idomenu ido-ubiquitous git-rebase-mode git-commit-mode geiser exec-path-from-shell elpy company-jedi company-ansible company-anaconda clojure-mode-extra-font-locking cider)))
+ '(python-shell-interpreter "ipython"))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )
