@@ -29,6 +29,13 @@
 
 (add-hook 'python-mode-hook (lambda ()
                               (run-hooks 'prelude-personal-python-mode-hook)))
+
+(require 'hy-mode)
+
+(add-hook 'hy-mode-hook 'paredit-mode)
+(add-hook 'hy-mode-hook 'enable-paredit-mode)
+(add-hook 'hy-mode-hook #'rainbow-delimiters-mode)
+
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.

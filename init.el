@@ -46,6 +46,9 @@
     ;; https://github.com/clojure-emacs/cider
     cider
 
+    ;; LFE
+    lfe-mode
+
     ;; allow ido usage in as many contexts as possible. see
     ;; customizations/navigation.el line 23 for a description
     ;; of ido
@@ -151,7 +154,7 @@
  '(elpy-rpc-timeout 3)
  '(package-selected-packages
    (quote
-    (markdown-mode markdown-mode+ tagedit smex rainbow-delimiters quack py-yapf projectile pos-tip paredit magit ipython idomenu ido-ubiquitous git-rebase-mode git-commit-mode geiser exec-path-from-shell elpy company-jedi company-ansible company-anaconda clojure-mode-extra-font-locking cider)))
+    (lfe-mode markdown-mode markdown-mode+ tagedit smex rainbow-delimiters quack py-yapf projectile pos-tip paredit magit ipython idomenu ido-ubiquitous git-rebase-mode git-commit-mode geiser exec-path-from-shell elpy company-jedi company-ansible company-anaconda clojure-mode-extra-font-locking cider)))
  '(python-shell-interpreter "ipython"))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
