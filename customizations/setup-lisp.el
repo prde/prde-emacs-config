@@ -9,6 +9,8 @@
 (add-hook 'slime-mode-hook
           (lambda ()
             (require 'slime)
+            (load (expand-file-name "~/.quicklisp/slime-helper.el"))
+
             (setq-default slime-net-coding-system 'utf-8-unix)
 
             (setq-default lisp-body-indent 2)
