@@ -3,8 +3,8 @@
 ;;; Code:
 (add-to-list 'load-path (directory-file-name (or (file-name-directory #$) (car load-path))))
 
-;;;### (autoloads nil "inferior-lfe" "inferior-lfe.el" (22521 30520
-;;;;;;  157995 845000))
+;;;### (autoloads nil "inferior-lfe" "inferior-lfe.el" (22687 29741
+;;;;;;  589932 994000))
 ;;; Generated autoloads from inferior-lfe.el
 
 (autoload 'inferior-lfe-mode "inferior-lfe" "\
@@ -28,8 +28,8 @@ If `CMD' is given, use it to start the shell, otherwise:
 
 ;;;***
 
-;;;### (autoloads nil "lfe-indent" "lfe-indent.el" (22521 30520 91995
-;;;;;;  745000))
+;;;### (autoloads nil "lfe-indent" "lfe-indent.el" (22687 29741 534932
+;;;;;;  684000))
 ;;; Generated autoloads from lfe-indent.el
 
 (autoload 'lfe-indent-function "lfe-indent" "\
@@ -50,8 +50,8 @@ lfe-indent-{function,hook} and it uses `lfe-body-indent'.
 
 ;;;***
 
-;;;### (autoloads nil "lfe-mode" "lfe-mode.el" (22521 30520 213995
-;;;;;;  932000))
+;;;### (autoloads nil "lfe-mode" "lfe-mode.el" (22687 29741 655933
+;;;;;;  366000))
 ;;; Generated autoloads from lfe-mode.el
 
 (autoload 'lfe-mode "lfe-mode" "\
@@ -68,8 +68,8 @@ Other commands:
 
 ;;;***
 
-;;;### (autoloads nil nil ("lfe-mode-pkg.el") (22521 30520 17995
-;;;;;;  632000))
+;;;### (autoloads nil nil ("lfe-mode-pkg.el") (22687 29741 455932
+;;;;;;  238000))
 
 ;;;***
 

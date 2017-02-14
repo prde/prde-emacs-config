@@ -137,6 +137,7 @@
 (load "elisp-editing.el")
 
 ;; Langauage-specific
+(load "setup-lisp.el")
 (load "setup-clojure.el")
 (load "setup-js.el")
 (load "setup-latex.el")
@@ -154,7 +155,7 @@
  '(elpy-rpc-timeout 3)
  '(package-selected-packages
    (quote
-    (lfe-mode markdown-mode markdown-mode+ tagedit smex rainbow-delimiters quack py-yapf projectile pos-tip paredit magit ipython idomenu ido-ubiquitous git-rebase-mode git-commit-mode geiser exec-path-from-shell elpy company-jedi company-ansible company-anaconda clojure-mode-extra-font-locking cider)))
+    (slime lfe-mode markdown-mode markdown-mode+ tagedit smex rainbow-delimiters quack py-yapf projectile pos-tip paredit magit ipython idomenu ido-ubiquitous git-rebase-mode git-commit-mode geiser exec-path-from-shell elpy company-jedi company-ansible company-anaconda clojure-mode-extra-font-locking cider)))
  '(python-shell-interpreter "ipython"))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.

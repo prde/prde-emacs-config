@@ -1,9 +1,9 @@
 ;;; cl-lib-autoloads.el --- automatically extracted autoloads
 ;;
 ;;; Code:
-
+(add-to-list 'load-path (directory-file-name (or (file-name-directory #$) (car load-path))))
 
-;;;### (autoloads nil "cl-lib" "cl-lib.el" (21450 36061))
+;;;### (autoloads nil "cl-lib" "cl-lib.el" (22687 29743 60941 289000))
 ;;; Generated autoloads from cl-lib.el
  (let ((d (file-name-directory #$)))
   (when (member d load-path)
@@ -11,15 +11,9 @@
 
 ;;;***
 
-;;;### (autoloads nil nil ("cl-lib-pkg.el") (21450 36061 269545))
-
-;;;***
-
-(provide 'cl-lib-autoloads)
 ;; Local Variables:
 ;; version-control: never
 ;; no-byte-compile: t
 ;; no-update-autoloads: t
-;; coding: utf-8
 ;; End:
 ;;; cl-lib-autoloads.el ends here
