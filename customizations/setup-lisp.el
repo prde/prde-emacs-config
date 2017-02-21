@@ -18,6 +18,7 @@
 
 
 (dolist (mode-hook '(slime-mode-hook
+                     lfe-mode-hook
                      lisp-mode-hook
                      comint-mode-hook
                      lisp-interaction-mode-hook))
