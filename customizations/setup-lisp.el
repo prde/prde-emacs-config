@@ -18,10 +18,11 @@
 
 
 (dolist (mode-hook '(slime-mode-hook
-                     lfe-mode-hook
                      lisp-mode-hook
                      comint-mode-hook
-                     lisp-interaction-mode-hook))
+                     lisp-interaction-mode-hook
+                     clojure-mode-hook
+                     lfe-mode-hook))
   (add-hook mode-hook 'paredit-mode)
   (add-hook mode-hook 'enable-paredit-mode)
   (add-hook mode-hook #'rainbow-delimiters-mode))
