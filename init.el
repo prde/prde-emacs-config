@@ -62,6 +62,9 @@
     ;; project navigation
     projectile
 
+    ;; plantuml
+    plantuml-mode
+
     ;; colorful parenthesis matching
     rainbow-delimiters
 
@@ -142,6 +145,7 @@
 (load "setup-js.el")
 (load "setup-latex.el")
 (load "setup-python.el")
+(load "setup-plantuml.el")
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -155,7 +159,7 @@
  '(elpy-rpc-timeout 3)
  '(package-selected-packages
    (quote
-    (haskell-mode haskell-emacs graphviz-dot-mode slime lfe-mode markdown-mode markdown-mode+ tagedit smex rainbow-delimiters quack py-yapf projectile pos-tip paredit magit ipython idomenu ido-ubiquitous git-rebase-mode git-commit-mode geiser exec-path-from-shell elpy company-jedi company-ansible company-anaconda clojure-mode-extra-font-locking cider)))
+    (plantuml-mode haskell-mode haskell-emacs graphviz-dot-mode slime lfe-mode markdown-mode markdown-mode+ tagedit smex rainbow-delimiters quack py-yapf projectile pos-tip paredit magit ipython idomenu ido-ubiquitous git-rebase-mode git-commit-mode geiser exec-path-from-shell elpy company-jedi company-ansible company-anaconda clojure-mode-extra-font-locking cider)))
  '(python-shell-interpreter "ipython"))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
