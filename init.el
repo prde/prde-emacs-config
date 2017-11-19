@@ -78,7 +78,10 @@
     ipython
 
     ;; Python IDE
-    elpy))
+    elpy
+
+    ;; Scala IDE
+    ensime))
 
 ;; On OS X, an Emacs instance started from the graphical user
 ;; interface will have a different environment than a shell in a
@@ -146,6 +149,7 @@
 (load "setup-latex.el")
 (load "setup-python.el")
 (load "setup-plantuml.el")
+(load "setup-scala.el")
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -159,7 +163,8 @@
  '(elpy-rpc-timeout 3)
  '(package-selected-packages
    (quote
-    (plantuml-mode haskell-mode haskell-emacs graphviz-dot-mode slime lfe-mode markdown-mode markdown-mode+ tagedit smex rainbow-delimiters quack py-yapf projectile pos-tip paredit magit ipython idomenu ido-ubiquitous git-rebase-mode git-commit-mode geiser exec-path-from-shell elpy company-jedi company-ansible company-anaconda clojure-mode-extra-font-locking cider)))
+    (ensime scala-mode plantuml-mode haskell-mode haskell-emacs graphviz-dot-mode slime lfe-mode markdown-mode markdown-mode+ tagedit smex rainbow-delimiters quack py-yapf projectile pos-tip paredit magit ipython idomenu ido-ubiquitous git-rebase-mode git-commit-mode geiser exec-path-from-shell elpy company-jedi company-ansible company-anaconda clojure-mode-extra-font-locking cider)))
+ '(plantuml-jar-path "/usr/share/java/plantuml.jar")
  '(python-shell-interpreter "ipython"))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
