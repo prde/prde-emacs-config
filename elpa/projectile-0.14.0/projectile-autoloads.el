@@ -1,10 +1,10 @@
 ;;; projectile-autoloads.el --- automatically extracted autoloads
 ;;
 ;;; Code:
-(add-to-list 'load-path (or (file-name-directory #$) (car load-path)))
+(add-to-list 'load-path (directory-file-name (or (file-name-directory #$) (car load-path))))
 
-;;;### (autoloads nil "projectile" "projectile.el" (22235 10814 390556
-;;;;;;  272000))
+;;;### (autoloads nil "projectile" "projectile.el" (23072 38867 147485
+;;;;;;  873000))
 ;;; Generated autoloads from projectile.el
 
 (autoload 'projectile-version "projectile" "\
@@ -44,6 +44,13 @@ Purge DIR from the cache of the current project.
 Add the currently visited file to the cache.
 
 \(fn)" t nil)
+
+(autoload 'projectile-discover-projects-in-directory "projectile" "\
+Discover any projects in DIRECTORY and add them to the projectile cache.
+This function is not recursive and only adds projects with roots
+at the top level of DIRECTORY.
+
+\(fn DIRECTORY)" t nil)
 
 (autoload 'projectile-switch-to-buffer "projectile" "\
 Switch to a project buffer.
@@ -231,8 +238,31 @@ Invoke `async-shell-command' in the project's root.
 
 \(fn)" t nil)
 
+(autoload 'projectile-run-shell "projectile" "\
+Invoke `shell' in the project's root.
+
+\(fn)" t nil)
+
+(autoload 'projectile-run-eshell "projectile" "\
+Invoke `eshell' in the project's root.
+
+\(fn)" t nil)
+
+(autoload 'projectile-run-term "projectile" "\
+Invoke `term' in the project's root.
+
+\(fn PROGRAM)" t nil)
+
 (autoload 'projectile-replace "projectile" "\
-Replace a string in the project using `tags-query-replace'.
+Replace literal string in project using non-regexp `tags-query-replace'.
+
+With a prefix argument ARG prompts you for a directory on which
+to run the replacement.
+
+\(fn &optional ARG)" t nil)
+
+(autoload 'projectile-replace-regexp "projectile" "\
+Replace a regexp in the project using `tags-query-replace'.
 
 With a prefix argument ARG prompts you for a directory on which
 to run the replacement.
@@ -395,7 +425,8 @@ Otherwise behave as if called interactively.
 
 (defvar projectile-global-mode nil "\
 Non-nil if Projectile-Global mode is enabled.
-See the command `projectile-global-mode' for a description of this minor mode.
+See the `projectile-global-mode' command
+for a description of this minor mode.
 Setting this variable directly does not take effect;
 either customize it (see the info node `Easy Customization')
 or call the function `projectile-global-mode'.")

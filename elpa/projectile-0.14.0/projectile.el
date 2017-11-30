@@ -4,9 +4,9 @@
 
 ;; Author: Bozhidar Batsov <bozhidar@batsov.com>
 ;; URL: https://github.com/bbatsov/projectile
-;; Package-Version: 20160304.1424
+;; Package-Version: 0.14.0
 ;; Keywords: project, convenience
-;; Version: 0.14.0-cvs
+;; Version: 0.14.0
 ;; Package-Requires: ((dash "2.11.0") (pkg-info "0.4"))
 
 ;; This file is NOT part of GNU Emacs.
@@ -47,12 +47,19 @@
 (eval-when-compile
   (defvar ag-ignore-list)
   (defvar ggtags-completion-table)
-  (defvar tags-completion-table))
+  (defvar tags-completion-table)
+  (defvar tags-loop-scan)
+  (defvar tags-loop-operate)
+  (defvar eshell-buffer-name)
+  (defvar explicit-shell-file-name))
 
 (declare-function ggtags-ensure-project "ggtags")
 (declare-function ggtags-update-tags "ggtags")
 (declare-function pkg-info-version-info "pkg-info")
 (declare-function tags-completion-table "etags")
+(declare-function make-term "term")
+(declare-function term-mode "term")
+(declare-function term-char-mode "term")
 
 (defvar grep-files-aliases)
 (defvar grep-find-ignored-directories)
@@ -87,7 +94,7 @@ attention to case differences."
     '(when (< emacs-major-version 25)
        (defvar etags--table-line-limit 500)
        (defun etags-tags-completion-table ()
-         (let (table
+         (let ((table (make-vector 511 0))
                (progress-reporter
                 (make-progress-reporter
                  (format "Making tags completion table for %s..." buffer-file-name)
@@ -99,15 +106,15 @@ attention to case differences."
                          "[\f\t\n\r()=,; ]?\177\\\(?:\\([^\n\001]+\\)\001\\)?"
                          (+ (point) etags--table-line-limit) t))
                    (forward-line 1)
-                 (push (prog1 (if (match-beginning 1)
-                                  (buffer-substring (match-beginning 1) (match-end 1))
-                                (goto-char (match-beginning 0))
-                                (skip-chars-backward "^\f\t\n\r()=,; ")
-                                (prog1
-                                    (buffer-substring (point) (match-beginning 0))
-                                  (goto-char (match-end 0))))
-                         (progress-reporter-update progress-reporter (point)))
-                       table))))
+                 (intern (prog1 (if (match-beginning 1)
+                                    (buffer-substring (match-beginning 1) (match-end 1))
+                                  (goto-char (match-beginning 0))
+                                  (skip-chars-backward "^\f\t\n\r()=,; ")
+                                  (prog1
+                                      (buffer-substring (point) (match-beginning 0))
+                                    (goto-char (match-end 0))))
+                           (progress-reporter-update progress-reporter (point)))
+                         table))))
            table))))
 
   )
@@ -212,6 +219,26 @@ Otherwise consider the current directory the project root."
   :group 'projectile
   :type 'string)
 
+(defcustom projectile-tags-backend 'auto
+  "The tag backend that Projectile should use.
+
+If set to 'auto', `projectile-find-tag' will automatically choose
+which backend to use. Preference order is ggtags -> etags-select
+-> find-tag. Variable can also be set to specify which backend to
+use. If selected backend is unavailable, fall back to `find-tag'.
+
+If this variable is set to 'auto' and ggtags is available, or if
+set to 'ggtags', then ggtags will be used for
+`projectile-regenerate-tags'. For all other settings
+`projectile-tags-command' will be used."
+  :group 'projectile
+  :type '(radio
+          (const :tag "auto" auto)
+          (const :tag "ggtags" ggtags)
+          (const :tag "etags" etags-select)
+          (const :tag "standard" find-tag))
+  :package-version '(projectile . "0.14.0"))
+
 (defcustom projectile-sort-order 'default
   "The sort order used for a project's files."
   :group 'projectile
@@ -274,6 +301,7 @@ If variable `projectile-project-name' is non-nil, this function will not be used
     "Cargo.toml"         ; Cargo project file
     "mix.exs"            ; Elixir mix project file
     "stack.yaml"         ; Haskell's stack tool based project
+    "info.rkt"           ; Racket package description file
     "TAGS"               ; etags/ctags are usually in the root of project
     "GTAGS"              ; GNU Global tags
     )
@@ -322,6 +350,12 @@ containing a root file."
   :group 'projectile
   :type '(repeat string))
 
+(defcustom projectile-globally-unignored-files nil
+  "A list of files globally unignored by projectile."
+  :group 'projectile
+  :type '(repeat string)
+  :package-version '(projectile "0.14.0"))
+
 (defcustom projectile-globally-ignored-file-suffixes
   nil
   "A list of file suffixes globally ignored by projectile."
@@ -340,8 +374,15 @@ containing a root file."
     ".svn"
     ".stack-work")
   "A list of directories globally ignored by projectile."
+  :safe (lambda (x) (not (remq t (mapcar #'stringp x))))
   :group 'projectile
   :type '(repeat string))
+
+(defcustom projectile-globally-unignored-directories nil
+  "A list of directories globally unignored by projectile."
+  :group 'projectile
+  :type '(repeat string)
+  :package-version '(projectile "0.14.0"))
 
 (defcustom projectile-globally-ignored-modes
   '("erc-mode"
@@ -665,8 +706,8 @@ The cache is created both in memory and on the hard drive."
   "Add the currently visited file to the cache."
   (interactive)
   (let ((current-project (projectile-project-root)))
-    (when (gethash (projectile-project-root) projectile-projects-cache)
-      (let* ((abs-current-file (file-truename (buffer-file-name (current-buffer))))
+    (when (and (buffer-file-name) (gethash (projectile-project-root) projectile-projects-cache))
+      (let* ((abs-current-file (file-truename (buffer-file-name)))
              (current-file (file-relative-name abs-current-file current-project)))
         (unless (or (projectile-file-cached-p current-file current-project)
                     (projectile-ignored-directory-p (file-name-directory abs-current-file))
@@ -700,6 +741,23 @@ The cache is created both in memory and on the hard drive."
   (when (or force (file-newer-than-file-p (projectile-dirconfig-file)
                                           projectile-cache-file))
     (projectile-invalidate-cache nil)))
+
+;;;###autoload
+(defun projectile-discover-projects-in-directory (directory)
+  "Discover any projects in DIRECTORY and add them to the projectile cache.
+This function is not recursive and only adds projects with roots
+at the top level of DIRECTORY."
+  (interactive
+   (list (read-directory-name "Starting directory: ")))
+  (let ((subdirs (directory-files directory t)))
+    (mapcar
+     (lambda (dir)
+       (when (and (file-directory-p dir)
+                  (not (member (file-name-nondirectory dir) '(".." "."))))
+         (let ((default-directory dir))
+           (when (projectile-project-p)
+             (projectile-add-known-project (projectile-project-root))))))
+     subdirs)))
 
 
 (defadvice delete-file (before purge-from-projectile-cache (filename &optional trash))
@@ -784,7 +842,7 @@ The current directory is assumed to be the project's root otherwise."
   (let ((dir default-directory))
     (or (--some (let* ((cache-key (format "%s-%s" it dir))
                        (cache-value (gethash cache-key projectile-project-root-cache)))
-                  (if cache-value
+                  (if (and cache-value (file-exists-p cache-value))
                       cache-value
                     (let ((value (funcall it (file-truename dir))))
                       (puthash cache-key value projectile-project-root-cache)
@@ -827,7 +885,7 @@ A thin wrapper around `file-truename' that handles nil."
 (defun projectile-get-project-directories ()
   "Get the list of project directories that are of interest to the user."
   (-map (lambda (subdir) (concat (projectile-project-root) subdir))
-        (or (car (projectile-parse-dirconfig-file)) '(""))))
+        (or (nth 0 (projectile-parse-dirconfig-file)) '(""))))
 
 (defun projectile-dir-files (directory)
   "List the files in DIRECTORY and in its sub-directories.
@@ -841,7 +899,7 @@ Files are returned as relative paths to the project root."
         (if (eq projectile-indexing-method 'native)
             (projectile-dir-files-native root directory)
           ;; use external tools to get the project files
-          (projectile-remove-ignored (projectile-dir-files-external root directory))))))
+          (projectile-adjust-files (projectile-dir-files-external root directory))))))
 
 (defun projectile-dir-files-native (root directory)
   "Get the files for ROOT under DIRECTORY using just Emacs Lisp."
@@ -851,7 +909,7 @@ Files are returned as relative paths to the project root."
                   (propertize directory 'face 'font-lock-keyword-face)))))
     ;; we need the files with paths relative to the project root
     (-map (lambda (file) (file-relative-name file root))
-          (projectile-index-directory directory (projectile-patterns-to-ignore)
+          (projectile-index-directory directory (projectile-filtering-patterns)
                                       progress-reporter))))
 
 (defun projectile-dir-files-external (root directory)
@@ -871,7 +929,13 @@ Files are returned as relative paths to the project root."
   :group 'projectile
   :type 'string)
 
-(defcustom projectile-hg-command "hg locate -0 -I ."
+(defcustom projectile-git-ignored-command "git ls-files -zcoi --exclude-standard"
+  "Command used by projectile to get the ignored files in a git project."
+  :group 'projectile
+  :type 'string
+  :package-version '(projectile "0.14.0"))
+
+(defcustom projectile-hg-command "hg locate -f -0 -I ."
   "Command used by projectile to get the files in a hg project."
   :group 'projectile
   :type 'string)
@@ -918,6 +982,13 @@ Files are returned as relative paths to the project root."
     (cond
      ((eq vcs 'git) projectile-git-submodule-command)
      (t ""))))
+
+(defun projectile-get-ext-ignored-command ()
+  "Determine which external command to invoke based on the project's VCS."
+  (let ((vcs (projectile-project-vcs)))
+    (cond
+     ((eq vcs 'git) projectile-git-ignored-command)
+     (t (error "VCS command for ignored files not implemented yet")))))
 
 (defun projectile-get-all-sub-projects (project)
   "Get all sub-projects for a given project.
@@ -980,6 +1051,11 @@ they are excluded from the results of this function."
            (projectile-get-sub-projects-files)))
    (t (projectile-files-via-ext-command (projectile-get-ext-command)))))
 
+(defun projectile-get-repo-ignored-files ()
+  "Get a list of the files ignored in the project."
+  (let ((cmd (projectile-get-ext-ignored-command)))
+    (projectile-files-via-ext-command cmd)))
+
 (defun projectile-files-via-ext-command (command)
   "Get a list of relative file names in the project root by executing COMMAND."
   (split-string (shell-command-to-string command) "\0" t))
@@ -1002,17 +1078,45 @@ function is executing."
          (list it))))
    (directory-files directory t)))
 
-(defun projectile-remove-ignored (files)
+(defun projectile-adjust-files (files)
+  "First remove ignored files from FILES, then add back unignored files."
+  (projectile-add-unignored (projectile-remove-ignored files)))
+
+(defun projectile-remove-ignored (files &optional subdirectories)
   "Remove ignored files and folders from FILES.
 
-Operates on filenames relative to the project root."
+Operates on filenames relative to the project root.  Optionally,
+you can filter ignored files in subdirectories by setting
+SUBDIRECTORIES to a non-nil value."
   (let ((ignored (append (projectile-ignored-files-rel)
                          (projectile-ignored-directories-rel))))
     (-remove (lambda (file)
-               (or (--any-p (string-prefix-p it file) ignored)
+               (or (--any-p (string-prefix-p it (if subdirectories
+                                                    (file-name-nondirectory file)
+                                                  file))
+                            ignored)
                    (--any-p (string-suffix-p it file) projectile-globally-ignored-file-suffixes)))
              files)))
 
+(defun projectile-keep-ignored-files (files)
+  "Filter FILES to retain only those that are ignored."
+  (when files
+    (-filter (lambda (file)
+               (--some (string-prefix-p it file) files))
+             (projectile-get-repo-ignored-files))))
+
+(defun projectile-add-unignored (files)
+  "This adds unignored files to FILES.
+
+Useful because the VCS may not return ignored files at all.  In
+this case unignored files will be absent from FILES."
+  (let ((unignored-files (projectile-keep-ignored-files
+                          (projectile-unignored-files-rel)))
+        (unignored-paths (projectile-remove-ignored
+                          (projectile-keep-ignored-files
+                           (projectile-unignored-directories-rel))
+                          'subdirectories)))
+    (append files unignored-files unignored-paths)))
 
 (defun projectile-buffers-with-file (buffers)
   "Return only those BUFFERS backed by files."
@@ -1054,7 +1158,7 @@ Operates on filenames relative to the project root."
          (string-equal (file-remote-p default-directory)
                        (file-remote-p project-root))
          (not (string-match-p "^http\\(s\\)?://" default-directory))
-         (string-prefix-p project-root (file-truename default-directory)))))
+         (string-prefix-p project-root (file-truename default-directory) (eq system-type 'windows-nt)))))
 
 (defun projectile-ignored-buffer-p (buffer)
   "Check if BUFFER should be ignored."
@@ -1136,6 +1240,35 @@ Only buffers not visible in windows are returned."
   (multi-occur (projectile-project-buffers)
                (car (occur-read-primary-args))))
 
+(defun projectile-normalise-paths (patterns)
+  "Remove leading `/' from the elements of PATTERNS."
+  (-non-nil (--map (and (string-prefix-p "/" it)
+                        ;; remove the leading /
+                        (substring it 1))
+                   patterns)))
+
+(defun projectile-expand-paths (paths)
+  "Expand the elements of PATHS.
+
+Elements containing wildcards are expanded and spliced into the
+resulting paths.  The returned PATHS are absolute, based on the
+projectile project root."
+  (let ((default-directory (projectile-project-root)))
+    (-flatten (-map
+               (lambda (pattern)
+                 (or (file-expand-wildcards pattern t)
+                     (projectile-expand-root pattern)))
+               paths))))
+
+(defun projectile-normalise-patterns (patterns)
+  "Remove paths from PATTERNS."
+  (--remove (string-prefix-p "/" it) patterns))
+
+(defun projectile-make-relative-to-root (files)
+  "Make FILES relative to the project root."
+  (let ((project-root (projectile-project-root)))
+    (--map (file-relative-name it project-root) files)))
+
 (defun projectile-ignored-directory-p (directory)
   "Check if DIRECTORY should be ignored."
   (member directory (projectile-ignored-directories)))
@@ -1144,71 +1277,128 @@ Only buffers not visible in windows are returned."
   "Check if FILE should be ignored."
   (member file (projectile-ignored-files)))
 
+(defun projectile-check-pattern-p (file pattern)
+  "Check if FILE meets PATTERN."
+  (or (string-suffix-p (directory-file-name pattern)
+                       (directory-file-name file))
+      (member file (file-expand-wildcards pattern t))))
+
 (defun projectile-ignored-rel-p (file directory patterns)
-  "Check if FILE should be ignored relative to DIRECTORY according to PATTERNS."
+  "Check if FILE should be ignored relative to DIRECTORY
+according to PATTERNS: (ignored . unignored)"
   (let ((default-directory directory))
-    (--any-p (or (string-suffix-p (directory-file-name it)
-                                  (directory-file-name file))
-                 (member file (file-expand-wildcards it t)))
-             patterns)))
+    (and (--any-p (projectile-check-pattern-p file it) (car patterns))
+         (--none-p (projectile-check-pattern-p file it) (cdr patterns)))))
 
 (defun projectile-ignored-files ()
   "Return list of ignored files."
-  (-map
-   #'projectile-expand-root
-   (append
-    projectile-globally-ignored-files
-    (projectile-project-ignored-files))))
+  (-difference
+   (-map
+    #'projectile-expand-root
+    (append
+     projectile-globally-ignored-files
+     (projectile-project-ignored-files)))
+   (projectile-unignored-files)))
 
 (defun projectile-ignored-directories ()
   "Return list of ignored directories."
+  (-difference
+   (-map
+    #'file-name-as-directory
+    (-map
+     #'projectile-expand-root
+     (append
+      projectile-globally-ignored-directories
+      (projectile-project-ignored-directories))))
+   (projectile-unignored-directories)))
+
+(defun projectile-ignored-directories-rel ()
+  "Return list of ignored directories, relative to the root."
+  (projectile-make-relative-to-root (projectile-ignored-directories)))
+
+(defun projectile-ignored-files-rel ()
+  "Return list of ignored files, relative to the root."
+  (projectile-make-relative-to-root (projectile-ignored-files)))
+
+(defun projectile-project-ignored-files ()
+  "Return list of project ignored files. Unignored files are not
+included."
+  (-remove 'file-directory-p (projectile-project-ignored)))
+
+(defun projectile-project-ignored-directories ()
+  "Return list of project ignored directories. Unignored
+directories are not included."
+  (-filter 'file-directory-p (projectile-project-ignored)))
+
+(defun projectile-paths-to-ignore ()
+  "Return a list of ignored project paths."
+  (projectile-normalise-paths (nth 1 (projectile-parse-dirconfig-file))))
+
+(defun projectile-patterns-to-ignore ()
+  "Return a list of relative file patterns."
+  (projectile-normalise-patterns (nth 1 (projectile-parse-dirconfig-file))))
+
+(defun projectile-project-ignored ()
+  "Return list of project ignored files/directories. Unignored
+files/directories are not included."
+  (let ((paths (projectile-paths-to-ignore)))
+    (projectile-expand-paths paths)))
+
+(defun projectile-unignored-files ()
+  "Return list of unignored files."
+  (-map
+   #'projectile-expand-root
+   (append
+    projectile-globally-unignored-files
+    (projectile-project-unignored-files))))
+
+(defun projectile-unignored-directories ()
+  "Return list of unignored directories."
   (-map
    #'file-name-as-directory
    (-map
     #'projectile-expand-root
     (append
-     projectile-globally-ignored-directories
-     (projectile-project-ignored-directories)))))
+     projectile-globally-unignored-directories
+     (projectile-project-unignored-directories)))))
 
-(defun projectile-ignored-directories-rel ()
-  "Return list of ignored directories, relative to the root."
-  (let ((project-root (projectile-project-root)))
-    (--map (file-relative-name it project-root) (projectile-ignored-directories))))
+(defun projectile-unignored-directories-rel ()
+  "Return list of unignored directories, relative to the root."
+  (projectile-make-relative-to-root (projectile-unignored-directories)))
 
-(defun projectile-ignored-files-rel ()
-  "Return list of ignored files, relative to the root."
-  (let ((project-root (projectile-project-root)))
-    (--map (file-relative-name it project-root) (projectile-ignored-files))))
+(defun projectile-unignored-files-rel ()
+  "Return list of unignored files, relative to the root."
+  (projectile-make-relative-to-root (projectile-unignored-files)))
 
-(defun projectile-project-ignored-files ()
-  "Return list of project ignored files."
-  (-remove 'file-directory-p (projectile-project-ignored)))
+(defun projectile-project-unignored-files ()
+  "Return list of project unignored files."
+  (-remove 'file-directory-p (projectile-project-unignored)))
 
-(defun projectile-project-ignored-directories ()
-  "Return list of project ignored directories."
-  (-filter 'file-directory-p (projectile-project-ignored)))
+(defun projectile-project-unignored-directories ()
+  "Return list of project unignored directories."
+  (-filter 'file-directory-p (projectile-project-unignored)))
 
-(defun projectile-paths-to-ignore ()
-  "Return a list of ignored project paths."
-  (-non-nil (--map (and (string-prefix-p "/" it)
-                        ;; remove the leading /
-                        (substring it 1))
-                   (cdr (projectile-parse-dirconfig-file)))))
+(defun projectile-paths-to-ensure ()
+  "Return a list of unignored project paths."
+  (projectile-normalise-paths (nth 2 (projectile-parse-dirconfig-file))))
 
-(defun projectile-patterns-to-ignore ()
+(defun projectile-files-to-ensure ()
+  (-flatten (--map (file-expand-wildcards it t)
+                   (projectile-patterns-to-ensure))))
+
+(defun projectile-patterns-to-ensure ()
   "Return a list of relative file patterns."
-  (--remove (string-prefix-p "/" it)
-            (cdr (projectile-parse-dirconfig-file))))
+  (projectile-normalise-patterns (nth 2 (projectile-parse-dirconfig-file))))
 
-(defun projectile-project-ignored ()
+(defun projectile-filtering-patterns ()
+  (cons (projectile-patterns-to-ignore)
+        (projectile-patterns-to-ensure)))
+
+(defun projectile-project-unignored ()
   "Return list of project ignored files/directories."
-  (let ((paths (projectile-paths-to-ignore))
-        (default-directory (projectile-project-root)))
-    (-flatten (-map
-               (lambda (pattern)
-                 (or (file-expand-wildcards pattern t)
-                     (projectile-expand-root pattern)))
-               paths))))
+  (delete-dups (append (projectile-expand-paths (projectile-paths-to-ensure))
+                       (projectile-expand-paths (projectile-files-to-ensure)))))
+
 
 (defun projectile-dirconfig-file ()
   "Return the absolute path to the project's dirconfig file."
@@ -1217,15 +1407,16 @@ Only buffers not visible in windows are returned."
 (defun projectile-parse-dirconfig-file ()
   "Parse project ignore file and return directories to ignore and keep.
 
-The return value will be a cons, the car being the list of
-directories to keep, and the cdr being the list of files or
-directories to ignore.
+The return value will be a list of three elements, the car being
+the list of directories to keep, the cadr being the list of files
+or directories to ignore, and the caddr being the list of files
+or directories to ensure.
 
 Strings starting with + will be added to the list of directories
 to keep, and strings starting with - will be added to the list of
 directories to ignore.  For backward compatibility, without a
 prefix the string will be assumed to be an ignore string."
-  (let (keep ignore (dirconfig (projectile-dirconfig-file)))
+  (let (keep ignore ensure (dirconfig (projectile-dirconfig-file)))
     (when (projectile-file-exists-p dirconfig)
       (with-temp-buffer
         (insert-file-contents dirconfig)
@@ -1233,12 +1424,15 @@ prefix the string will be assumed to be an ignore string."
           (pcase (char-after)
             (?+ (push (buffer-substring (1+ (point)) (line-end-position)) keep))
             (?- (push (buffer-substring (1+ (point)) (line-end-position)) ignore))
+            (?! (push (buffer-substring (1+ (point)) (line-end-position)) ensure))
             (_  (push (buffer-substring     (point)  (line-end-position)) ignore)))
           (forward-line)))
-      (cons (--map (file-name-as-directory (projectile-trim-string it))
+      (list (--map (file-name-as-directory (projectile-trim-string it))
                    (delete "" (reverse keep)))
             (-map  #'projectile-trim-string
-                   (delete "" (reverse ignore)))))))
+                   (delete "" (reverse ignore)))
+            (-map  #'projectile-trim-string
+                   (delete "" (reverse ensure)))))))
 
 (defun projectile-expand-root (name)
   "Expand NAME to project root.
@@ -1270,8 +1464,10 @@ https://github.com/emacs-helm/helm")))
         (user-error "Please install grizzl from \
 https://github.com/d11wtq/grizzl")))
      ((eq projectile-completion-system 'ivy)
-      (if (fboundp 'ivy-completing-read)
-          (ivy-completing-read prompt choices nil nil initial-input)
+      (if (fboundp 'ivy-read)
+          (ivy-read prompt choices
+                    :initial-input initial-input
+                    :caller 'projectile-completing-read)
         (user-error "Please install ivy from \
 https://github.com/abo-abo/swiper")))
      (t (funcall projectile-completion-system prompt choices)))))
@@ -1664,7 +1860,7 @@ a COMPILE-CMD, a TEST-CMD, and a RUN-CMD."
 (projectile-register-project-type 'lein-test '("project.clj") "lein compile" "lein test")
 (projectile-register-project-type 'lein-midje '("project.clj" ".midje.clj") "lein compile" "lein midje")
 (projectile-register-project-type 'boot-clj '("build.boot") "boot aot" "boot test")
-(projectile-register-project-type 'rebar '("rebar") "rebar" "rebar eunit")
+(projectile-register-project-type 'rebar '("rebar.config") "rebar" "rebar eunit")
 (projectile-register-project-type 'sbt '("build.sbt") "sbt compile" "sbt test")
 (projectile-register-project-type 'make '("Makefile") "make" "make test")
 (projectile-register-project-type 'grunt '("Gruntfile.js") "grunt" "grunt test")
@@ -1672,8 +1868,10 @@ a COMPILE-CMD, a TEST-CMD, and a RUN-CMD."
 (projectile-register-project-type 'haskell-stack '("stack.yaml") "stack build" "stack build --test")
 (projectile-register-project-type 'haskell-cabal #'projectile-cabal "cabal build" "cabal test")
 (projectile-register-project-type 'rust-cargo '("Cargo.toml") "cargo build" "cargo test")
-(projectile-register-project-type 'r '("DESCRIPTION") "R CMD INSTALL ." (concat "R CMD check -o " temporary-file-directory " ."))
+(projectile-register-project-type 'r '("DESCRIPTION") "R CMD INSTALL --with-keep.source ." (concat "R CMD check -o " temporary-file-directory " ."))
 (projectile-register-project-type 'go #'projectile-go "go build ./..." "go test ./...")
+(projectile-register-project-type 'racket '("info.rkt") nil "raco test .")
+(projectile-register-project-type 'elixir '("mix.exs") "mix compile" "mix test")
 
 (defun projectile-cabal ()
   "Check if a project contains *.cabal files but no stack.yaml file."
@@ -1822,12 +2020,14 @@ It assumes the test/ folder is at the same level as src/."
 (defun projectile-test-suffix (project-type)
   "Find default test files suffix based on PROJECT-TYPE."
   (cond
+   ((member project-type '(rebar)) "_SUITE")
    ((member project-type '(emacs-cask)) "-test")
    ((member project-type '(rails-rspec ruby-rspec)) "_spec")
-   ((member project-type '(rails-test ruby-test lein-test boot-clj go)) "_test")
+   ((member project-type '(rails-test ruby-test lein-test boot-clj go elixir)) "_test")
    ((member project-type '(scons)) "test")
    ((member project-type '(maven symfony)) "Test")
-   ((member project-type '(gradle gradlew grails)) "Spec")))
+   ((member project-type '(gradle gradlew grails)) "Spec")
+   ((member project-type '(sbt)) "Spec")))
 
 (defun projectile-dirname-matching-count (a b)
   "Count matching dirnames ascending file paths."
@@ -1993,7 +2193,8 @@ regular expression."
 (defun projectile-regenerate-tags ()
   "Regenerate the project's [e|g]tags."
   (interactive)
-  (if (boundp 'ggtags-mode)
+  (if (and (boundp 'ggtags-mode)
+       (memq projectile-tags-backend '(auto ggtags)))
       (progn
         (let* ((ggtags-project-root (projectile-project-root))
                (default-directory ggtags-project-root))
@@ -2012,7 +2213,8 @@ regular expression."
                             (buffer-substring (point-min) (point-max)))))
       (unless (zerop exit-code)
         (error shell-output))
-      (visit-tags-table tags-file))))
+      (visit-tags-table tags-file)
+      (message "Regenerated %s" tags-file))))
 
 (defun projectile-visit-project-tags-table ()
   "Visit the current project's tags table."
@@ -2022,19 +2224,31 @@ regular expression."
         (with-demoted-errors "Error loading tags-file: %s"
           (visit-tags-table tags-file t))))))
 
+(defun projectile-determine-find-tag-fn ()
+  "Determine which function to use for a call to `projectile-find-tag'."
+  (cond
+    ((eq projectile-tags-backend 'auto)
+      (cond
+        ((fboundp 'ggtags-find-tag-dwim)
+          'ggtags-find-tag-dwim)
+        ((fboundp 'etags-select-find-tag)
+          'etags-select-find-tag)
+        (t 'find-tag)))
+    ((eq projectile-tags-backend 'ggtags)
+      (if (fboundp 'ggtags-find-tag-dwim)
+        'ggtags-find-tag-dwim 'find-tag))
+    ((eq projectile-tags-backend 'etags-select)
+      (if (fboundp 'etags-select-find-tag)
+        'etags-select-find-tag 'find-tag))
+    (t 'find-tag)))
+
 ;;;###autoload
 (defun projectile-find-tag ()
   "Find tag in project."
   (interactive)
   (projectile-visit-project-tags-table)
   ;; Auto-discover the user's preference for tags
-  (let ((find-tag-fn (cond
-                      ((fboundp 'ggtags-find-tag-dwim)
-                       'ggtags-find-tag-dwim)
-                      ((fboundp 'etags-select-find-tag)
-                       'etags-select-find-tag)
-                      (t
-                       'find-tag))))
+  (let ((find-tag-fn (projectile-determine-find-tag-fn)))
     (call-interactively find-tag-fn)))
 
 (defmacro projectile-with-default-dir (dir &rest body)
@@ -2063,6 +2277,41 @@ regular expression."
   (interactive)
   (projectile-with-default-dir (projectile-project-root)
     (call-interactively 'async-shell-command)))
+
+;;;###autoload
+(defun projectile-run-shell ()
+  "Invoke `shell' in the project's root."
+  (interactive)
+  (projectile-with-default-dir (projectile-project-root)
+    (shell (concat "*shell " (projectile-project-name) "*"))))
+
+;;;###autoload
+(defun projectile-run-eshell ()
+  "Invoke `eshell' in the project's root."
+  (interactive)
+  (let ((eshell-buffer-name (concat "*eshell " (projectile-project-name) "*")))
+     (projectile-with-default-dir (projectile-project-root)
+       (eshell))))
+
+;;;###autoload
+(defun projectile-run-term (program)
+  "Invoke `term' in the project's root."
+  (interactive (list nil))
+  (let* ((term (concat "term " (projectile-project-name)))
+         (buffer (concat "*" term "*")))
+    (unless (get-buffer buffer)
+      (require 'term)
+      (let ((program (or program
+                         (read-from-minibuffer "Run program: "
+                                               (or explicit-shell-file-name
+                                                   (getenv "ESHELL")
+                                                   (getenv "SHELL")
+                                                   "/bin/sh")))))
+        (projectile-with-default-dir (projectile-project-root)
+          (set-buffer (make-term term program))
+          (term-mode)
+          (term-char-mode))))
+    (switch-to-buffer buffer)))
 
 (defun projectile-files-in-project-directory (directory)
   "Return a list of files in DIRECTORY."
@@ -2100,16 +2349,17 @@ files in the project."
                          (concat "ag --literal --nocolor --noheading -l -- "
                                  search-term))
                         ((executable-find "ack")
-                         (concat "ack --noheading --nocolor -l -- "
+                         (concat "ack --literal --noheading --nocolor -l -- "
                                  search-term))
                         ((and (executable-find "git")
                               (eq (projectile-project-vcs) 'git))
-                         (concat "git grep -HlI "
-                                 search-term))
+                         (concat "git grep -HlI " search-term))
                         (t
-                         (concat "grep -rHlI "
-                                 search-term
-                                 " .")))))
+                         ;; -r: recursive
+                         ;; -H: show filename for each match
+                         ;; -l: show only file names with matches
+                         ;; -I: no binary files
+                         (format "grep -rHlI %s ." search-term)))))
         (projectile-files-from-cmd cmd directory))
     ;; we have to reject directories as a workaround to work with git submodules
     (-reject #'file-directory-p
@@ -2117,7 +2367,7 @@ files in the project."
 
 ;;;###autoload
 (defun projectile-replace (&optional arg)
-  "Replace a string in the project using `tags-query-replace'.
+  "Replace literal string in project using non-regexp `tags-query-replace'.
 
 With a prefix argument ARG prompts you for a directory on which
 to run the replacement."
@@ -2133,6 +2383,43 @@ to run the replacement."
                          (read-directory-name "Replace in directory: "))
                       (projectile-project-root)))
          (files (projectile-files-with-string old-text directory)))
+    ;; Adapted from `tags-query-replace' for literal strings (not regexp)
+    (setq tags-loop-scan `(let ,(unless (equal old-text (downcase old-text))
+                                  '((case-fold-search nil)))
+                            (if (search-forward ',old-text nil t)
+                                ;; When we find a match, move back to
+                                ;; the beginning of it so
+                                ;; perform-replace will see it.
+                                (goto-char (match-beginning 0))))
+          tags-loop-operate `(perform-replace ',old-text ',new-text t nil nil
+                                              nil multi-query-replace-map))
+    (tags-loop-continue (or (cons 'list files) t))))
+
+;;;###autoload
+(defun projectile-replace-regexp (&optional arg)
+  "Replace a regexp in the project using `tags-query-replace'.
+
+With a prefix argument ARG prompts you for a directory on which
+to run the replacement."
+  (interactive "P")
+  (let* ((old-text (read-string
+                    (projectile-prepend-project-name "Replace regexp: ")
+                    (projectile-symbol-or-selection-at-point)))
+         (new-text (read-string
+                    (projectile-prepend-project-name
+                     (format "Replace regexp %s with: " old-text))))
+         (directory (if arg
+                        (file-name-as-directory
+                         (read-directory-name "Replace regexp in directory: "))
+                      (projectile-project-root)))
+         (files
+          ;; We have to reject directories as a workaround to work with git submodules.
+          ;;
+          ;; We can't narrow the list of files with
+          ;; `projectile-files-with-string' because those regexp tools
+          ;; don't support Emacs regular expressions.
+          (-reject #'file-directory-p
+                   (-map #'projectile-expand-root (projectile-dir-files directory)))))
     (tags-query-replace old-text new-text nil (cons 'list files))))
 
 (defun projectile-symbol-or-selection-at-point ()
@@ -2304,7 +2591,7 @@ Should be set via .dir-locals.el.")
   "Run external or Elisp compilation command CMD."
   (if (functionp cmd)
       (funcall cmd)
-    (compilation-start cmd)))
+    (compile cmd)))
 
 ;;;###autoload
 (defun projectile-compile-project (arg &optional dir)
@@ -2757,10 +3044,10 @@ is chosen."
 (define-skeleton projectile-skel-dir-locals
   "Insert a .dir-locals.el template."
   nil
-  "((nil . (("
+  "((nil . ("
   ("" '(projectile-skel-variable-cons) \n)
   resume:
-  "))))")
+  ")))")
 
 ;;;###autoload
 (defun projectile-edit-dir-locals ()
@@ -2814,6 +3101,9 @@ is chosen."
     (define-key map (kbd "T") #'projectile-find-test-file)
     (define-key map (kbd "u") #'projectile-run-project)
     (define-key map (kbd "v") #'projectile-vc)
+    (define-key map (kbd "x e") #'projectile-run-eshell)
+    (define-key map (kbd "x t") #'projectile-run-term)
+    (define-key map (kbd "x s") #'projectile-run-shell)
     (define-key map (kbd "z") #'projectile-cache-current-file)
     (define-key map (kbd "ESC") #'projectile-project-buffers-other-buffer)
     map)
@@ -2843,10 +3133,15 @@ is chosen."
    ["Open project in dired" projectile-dired]
    ["Switch to project" projectile-switch-project]
    ["Switch to open project" projectile-switch-open-project]
+   ["Discover projects in directory" projectile-discover-projects-in-directory]
    ["Search in project (grep)" projectile-grep]
    ["Search in project (ag)" projectile-ag]
    ["Replace in project" projectile-replace]
    ["Multi-occur in project" projectile-multi-occur]
+   "--"
+   ["Run shell" projectile-run-shell]
+   ["Run eshell" projectile-run-eshell]
+   ["Run term" projectile-run-term]
    "--"
    ["Cache current file" projectile-cache-current-file]
    ["Invalidate cache" projectile-invalidate-cache]
