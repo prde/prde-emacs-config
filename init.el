@@ -165,7 +165,12 @@
    (quote
     (projectile ensime scala-mode plantuml-mode haskell-mode haskell-emacs graphviz-dot-mode slime lfe-mode markdown-mode markdown-mode+ tagedit smex rainbow-delimiters quack py-yapf pos-tip paredit magit ipython idomenu ido-ubiquitous geiser exec-path-from-shell elpy company-jedi company-ansible company-anaconda clojure-mode-extra-font-locking cider)))
  '(plantuml-jar-path "/usr/share/java/plantuml.jar")
- '(python-shell-interpreter "ipython"))
+ '(python-shell-interpreter "ipython")
+ '(safe-local-variable-values
+   (quote
+    ((cider-cljs-lein-repl . "(do (user/go) (user/cljs-repl))")
+     (cider-refresh-after-fn . "reloaded.repl/resume")
+     (cider-refresh-before-fn . "reloaded.repl/suspend")))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
