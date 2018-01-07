@@ -163,7 +163,7 @@
  '(elpy-rpc-timeout 3)
  '(package-selected-packages
    (quote
-    (projectile ensime scala-mode plantuml-mode haskell-mode haskell-emacs graphviz-dot-mode slime lfe-mode markdown-mode markdown-mode+ tagedit smex rainbow-delimiters quack py-yapf pos-tip paredit magit ipython idomenu ido-ubiquitous geiser exec-path-from-shell elpy company-jedi company-ansible company-anaconda clojure-mode-extra-font-locking cider)))
+    (pyenv-mode projectile ensime scala-mode plantuml-mode haskell-mode haskell-emacs graphviz-dot-mode slime lfe-mode markdown-mode markdown-mode+ tagedit smex rainbow-delimiters quack py-yapf pos-tip paredit magit ipython idomenu ido-ubiquitous geiser exec-path-from-shell elpy company-jedi company-ansible company-anaconda clojure-mode-extra-font-locking cider)))
  '(plantuml-jar-path "/usr/share/java/plantuml.jar")
  '(python-shell-interpreter "ipython")
  '(safe-local-variable-values
