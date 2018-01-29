@@ -36,7 +36,7 @@
 (setq cider-repl-pop-to-buffer-on-connect t)
 
 ;; When there's a cider error, show its buffer and switch to it
-(setq cider-show-error-buffer t)
+(setq cider-show-error-buffer 'only-in-repl)
 (setq cider-auto-select-error-buffer t)
 
 ;; Where to store the cider history.
