@@ -10,6 +10,8 @@
              '("tromey" . "http://tromey.com/elpa/") t)
 (add-to-list 'package-archives
              '("melpa-stable" . "http://melpa-stable.milkbox.net/packages/") t)
+(add-to-list 'package-archives
+             '("melpa" . "http://melpa.org/packages/") t)
 
 ;; (setq package-archives '(("gnu" . "http://elpa.gnu.org/packages/")
 ;;                          ("marmalade" . "http://marmalade-repo.org/packages/")
@@ -142,6 +144,9 @@
 ;; For editing lisps
 (load "elisp-editing.el")
 
+;; Org Mode
+(load "setup-org.el")
+
 ;; Langauage-specific
 (load "setup-lisp.el")
 (load "setup-clojure.el")
@@ -163,7 +168,7 @@
  '(elpy-rpc-timeout 3)
  '(package-selected-packages
    (quote
-    (ac-cider pyenv-mode projectile ensime scala-mode plantuml-mode haskell-mode haskell-emacs graphviz-dot-mode slime lfe-mode markdown-mode markdown-mode+ tagedit smex rainbow-delimiters quack py-yapf pos-tip paredit magit ipython idomenu ido-ubiquitous geiser exec-path-from-shell elpy company-jedi company-ansible company-anaconda clojure-mode-extra-font-locking cider)))
+    (clomacs ac-cider pyenv-mode projectile ensime scala-mode plantuml-mode haskell-mode haskell-emacs graphviz-dot-mode slime lfe-mode markdown-mode markdown-mode+ tagedit smex rainbow-delimiters quack py-yapf pos-tip paredit magit ipython idomenu ido-ubiquitous geiser exec-path-from-shell elpy company-jedi company-ansible company-anaconda clojure-mode-extra-font-locking cider)))
  '(plantuml-jar-path "/usr/share/java/plantuml.jar")
  '(python-shell-interpreter "ipython")
  '(safe-local-variable-values
