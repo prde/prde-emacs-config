@@ -11,3 +11,4 @@ auto-save-list
 backups
 url
 .python-environments
+customizations/setup-private.el

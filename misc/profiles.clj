@@ -1,3 +1,3 @@
-{:repl {:plugins [[cider/cider-nrepl "0.15.1"]]}
- :user {:plugins [[cider/cider-nrepl "0.15.1"]
+{:repl {:plugins [[cider/cider-nrepl "0.17.0-SNAPSHOT"]]}
+ :user {:plugins [[cider/cider-nrepl "0.17.0-SNAPSHOT"]
                   [lein-nvd "0.4.1"]]}}

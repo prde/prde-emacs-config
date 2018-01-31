@@ -113,6 +113,7 @@
 ;; Adding this code will make Emacs enter yaml mode whenever you open
 ;; a .yml file
 (add-to-list 'load-path "~/.emacs.d/vendor")
+(add-to-list 'load-path "~/.emacs.d/vendor/flower-commander")
 
 
 ;;;;
@@ -155,6 +156,7 @@
 (load "setup-python.el")
 (load "setup-plantuml.el")
 (load "setup-scala.el")
+(load "setup-private.el")
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
