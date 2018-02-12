@@ -12,3 +12,5 @@ backups
 url
 .python-environments
 customizations/setup-private.el
+.cask
+
