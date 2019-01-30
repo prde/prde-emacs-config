@@ -1,0 +1,2 @@
+;;; -*- no-byte-compile: t -*-
+(define-package "clomacs" "20190104.1607" "Simplifies Emacs Lisp interaction with Clojure." '((emacs "24.3") (cider "0.18.0") (s "1.12.0") (simple-httpd "1.4.6")) :commit "fb6c501b974441efaca1dc12dab01978b724c5eb" :keywords '("clojure" "interaction") :authors '(("Kostafey" . "kostafey@gmail.com")) :maintainer '("Kostafey" . "kostafey@gmail.com") :url "https://github.com/clojure-emacs/clomacs")

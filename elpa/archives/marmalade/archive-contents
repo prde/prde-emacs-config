@@ -1,4 +1,9 @@
 (1
+ (zone-tunnels .
+	       [(20180309 2155)
+		((emacs
+		  (24)))
+		"A zone program inspired from the old DOS game" single])
  (zone-quotes .
 	      [(20170919 1825)
 	       ((emacs
@@ -634,7 +639,7 @@
 	    [(0 0 1)
 	     nil "Utilities for opening files with sudo" single])
  (sudden-death .
-	       [(0 1)
+	       [(0 2 1)
 		nil "Totsuzen-no-Shi" single])
  (subshell-proc .
 		[(1 0 0)
@@ -782,7 +787,7 @@
 	  [(1 23)
 	   nil "Play the Sokoban game in emacs" single])
  (snakehump .
-	    [(0 1 1)
+	    [(0 3 1)
 	     nil "Convert between compound word conventions" tar])
  (smtpmail-multi .
 		 [(0 6)
@@ -1330,6 +1335,13 @@
  (prolog .
 	 [(1 22)
 	  nil "major mode for editing and running Prolog (and Mercury) code" single])
+ (projectile-extras .
+		    [(20190101 2353)
+		     ((emacs
+		       (24))
+		      (cl-lib
+		       (0 5)))
+		     "A few extra functions for projectile" single])
  (projectile .
 	     [(0 10 0)
 	      ((s
@@ -1418,7 +1430,7 @@
 	   [(0 0 1)
 	    nil "get stuff from pinboard" single])
  (picpocket .
-	    [(38)
+	    [(40)
 	     ((emacs
 	       (24 4)))
 	     "Image viewer" single])
@@ -1446,7 +1458,7 @@
      [(0 12)
       nil "Emacs Lisp interface to the PostgreSQL RDBMS" single])
  (perspective .
-	      [(1 12)
+	      [(2 1)
 	       ((cl-lib
 		 (0 5)))
 	       "switch between named \"perspectives\" of the editor" single])
@@ -1583,6 +1595,11 @@
 	     (pkg-info
 	      (0 4)))
 	    "Ert-runner Integration Into Emacs." single])
+ (overcast-theme .
+		 [(20180315 1825)
+		  ((emacs
+		    (24)))
+		  "A dark but vibrant color theme for Emacs" single])
  (outlined-elisp-mode .
 		      [(1 0 5)
 		       nil "outline-minor-mode settings for emacs lisp" single])
@@ -1633,7 +1650,7 @@
 	      (1 6 8)))
 	    "Blog from Org mode to wordpress" tar])
  (org-trello .
-	     [(0 8 0)
+	     [(0 8 1)
 	      ((request-deferred
 		(0 2 0))
 	       (deferred
@@ -3587,7 +3604,7 @@
 		  (20160725 724)))
 		"Sound effects for Emacs" single])
  (emacs-new-buffer .
-		   [(20171026 1922)
+		   [(20190128 1912)
 		    ((emacs
 		      (24)))
 		    "Quickly create new buffers to take notes and more" single])
@@ -3602,13 +3619,13 @@
 	      [(0 0 0)
 	       nil "Android application development tools for Emacs" single])
  (emacs-daily-events .
-		     [(20170911 2235)
+		     [(20180707 2135)
 		      ((emacs
 			(24))
 		       (cl-lib
 			(0 5))
 		       (emacs-visual-notifications
-			(20170908 2035)))
+			(20180707 2135)))
 		      "An Emacs package to notify you on specified daily occurring events" single])
  (emacs-cl .
 	   [(0 5)
@@ -3686,7 +3703,7 @@
 	      [(1 15)
 	       nil "Faster emacs startup through byte-compiling." single])
  (elfeed-web .
-	     [(2 3 0)
+	     [(3 0 0)
 	      ((simple-httpd
 		(1 4 3))
 	       (elfeed
@@ -3695,7 +3712,7 @@
 		(24 1)))
 	      "web interface to Elfeed" tar])
  (elfeed .
-	 [(2 3 0)
+	 [(3 0 0)
 	  ((emacs
 	    (24 3)))
 	  "an Emacs Atom/RSS feed reader" tar])
@@ -3941,7 +3958,7 @@
        [(2 11 0)
 	nil "A modern list library for Emacs" single])
  (dart-mode .
-	    [(1 0 2)
+	    [(1 0 3)
 	     ((emacs
 	       (24 5))
 	      (cl-lib
@@ -3951,7 +3968,7 @@
 	      (flycheck
 	       (0 23))
 	      (s
-	       (1 11)))
+	       (1 10)))
 	     "Major mode for editing Dart files" single])
  (d-mode .
 	 [(2 0 4)
