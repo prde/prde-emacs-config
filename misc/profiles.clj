@@ -1,6 +1,6 @@
-{:repl {:plugins [[cider/cider-nrepl "0.17.0-SNAPSHOT" :exclusions [org.clojure/tools.nrepl]]]
+{:repl {:plugins [[cider/cider-nrepl "0.20.0" :exclusions [org.clojure/tools.nrepl]]]
         :dependencies [[org.clojure/tools.namespace "0.2.11"]]}
- :user {:plugins [[cider/cider-nrepl "0.17.0-SNAPSHOT" :exclusions [org.clojure/tools.nrepl]]
+ :user {:plugins [[cider/cider-nrepl "0.20.0" :exclusions [org.clojure/tools.nrepl]]
                   [lein-nvd "0.4.1" :exclusions [org.tcrawley/dynapath
                                                  org.slf4j/jcl-over-slf4j
                                                  org.apache.httpcomponents/httpcore
