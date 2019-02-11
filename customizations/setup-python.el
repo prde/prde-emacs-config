@@ -1,6 +1,6 @@
 ;; Elpy, the Emacs Lisp Python Environment
 ;; Initialize package mode along with all the installed packages
-(setenv "PYTHONPATH" "/usr/bin/python") 
+(setenv "PYTHONPATH" "/usr/bin/python3")
 
 
 (require 'elpy)
@@ -17,7 +17,7 @@
   (setq jedi:complete-on-dot t)
   ;; (auto-complete-mode)
   ;; (jedi:ac-setup)
-  (setq elpy-rpc-python-command "python")
+  (setq elpy-rpc-python-command "python3")
   ;; (company-quickhelp-mode)
   )
 
@@ -35,6 +35,8 @@
 (add-hook 'hy-mode-hook 'enable-paredit-mode)
 (add-hook 'hy-mode-hook #'rainbow-delimiters-mode)
 
+(setenv "IPY_TEST_SIMPLE_PROMPT" "1")
+
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -43,9 +45,13 @@
  '(company-auto-complete t)
  '(elpy-mode-hook (quote (subword-mode hl-line-mode)))
  '(elpy-disable-backend-error-display t)
- '(elpy-rpc-python-command "python")
+ '(elpy-rpc-python-command "python3")
  '(elpy-rpc-timeout 3)
- '(python-shell-interpreter "ipython"))
+ '(elpy-syntax-check-command "python3 -m pyflakes")
+ '(python-interactive t)
+ '(python-interactive-executable "/usr/bin/ipython3")
+ '(python-shell-interpreter "ipython3")
+ '(python-shell-interpreter-args "-i"))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.

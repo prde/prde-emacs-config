@@ -164,15 +164,10 @@
  ;; If there is more than one, they won't work right.
  '(coffee-tab-width 2)
  '(company-auto-complete t)
- '(elpy-disable-backend-error-display t)
- '(elpy-mode-hook (quote (subword-mode hl-line-mode)))
- '(elpy-rpc-python-command "python")
- '(elpy-rpc-timeout 3)
  '(package-selected-packages
    (quote
     (haskell-emacs haskell-mode flower kotlin-mode docker flycheck-package package-lint clomacs pyenv-mode projectile ensime scala-mode plantuml-mode graphviz-dot-mode slime lfe-mode markdown-mode markdown-mode+ tagedit smex rainbow-delimiters quack py-yapf pos-tip paredit magit ipython idomenu ido-ubiquitous geiser exec-path-from-shell elpy company-jedi company-ansible company-anaconda clojure-mode-extra-font-locking cider)))
  '(plantuml-jar-path "/usr/share/java/plantuml.jar")
- '(python-shell-interpreter "ipython")
  '(safe-local-variable-values
    (quote
     ((cider-cljs-lein-repl . "(do (user/go) (user/cljs-repl))")
