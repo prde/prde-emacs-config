@@ -44,7 +44,7 @@
 
 ;; This enables ido in all contexts where it could be useful, not just
 ;; for selecting buffer and file names
-(ido-ubiquitous-mode 1)
+;; (ido-ubiquitous-mode 1)
 
 ;; Shows a list of buffers
 (global-set-key (kbd "C-x C-b") 'ibuffer)

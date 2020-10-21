@@ -4,19 +4,9 @@
 
 ;; Define package repositories
 (require 'package)
-(add-to-list 'package-archives
-             '("marmalade" . "http://marmalade-repo.org/packages/") t)
-(add-to-list 'package-archives
-             '("tromey" . "http://tromey.com/elpa/") t)
-(add-to-list 'package-archives
-             '("melpa-stable" . "http://melpa-stable.milkbox.net/packages/") t)
-(add-to-list 'package-archives
-             '("melpa" . "http://melpa.org/packages/") t)
 
-;; (setq package-archives '(("gnu" . "http://elpa.gnu.org/packages/")
-;;                          ("marmalade" . "http://marmalade-repo.org/packages/")
-;;                          ("melpa" . "http://melpa-stable.milkbox.net/packages/")))
-
+(setq package-archives '(("gnu" . "http://elpa.gnu.org/packages/")
+                         ("melpa" . "http://melpa.org/packages/")))
 
 ;; Load and activate emacs packages. Do this first so that the
 ;; packages are loaded before you start trying to modify them.
@@ -47,6 +37,7 @@
     ;; integration with a Clojure REPL
     ;; https://github.com/clojure-emacs/cider
     cider
+    ac-cider
 
     ;; LFE
     lfe-mode
@@ -54,7 +45,7 @@
     ;; allow ido usage in as many contexts as possible. see
     ;; customizations/navigation.el line 23 for a description
     ;; of ido
-    ido-ubiquitous
+    ;; ido-ubiquitous
 
     ;; Enhances M-x to allow easier execution of commands. Provides
     ;; a filterable list of possible commands in the minibuffer
@@ -77,13 +68,14 @@
     magit
 
     ;; ipython
-    ipython
+    ;; ipython
 
     ;; Python IDE
     elpy
 
     ;; Scala IDE
-    ensime))
+    ;; ensime
+))
 
 ;; On OS X, an Emacs instance started from the graphical user
 ;; interface will have a different environment than a shell in a
@@ -125,7 +117,7 @@
 
 ;; Sets up exec-path-from-shell so that Emacs will use the correct
 ;; environment variables
-(load "shell-integration.el")
+;; (load "shell-integration.el")
 
 ;; These customizations make it easier for you to navigate files,
 ;; switch buffers, and choose options from the minibuffer.
@@ -163,16 +155,23 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(coffee-tab-width 2)
- '(company-auto-complete t)
+ '(company-auto-commit t)
+ '(elpy-disable-backend-error-display t)
+ '(elpy-mode-hook '(subword-mode hl-line-mode))
+ '(elpy-rpc-python-command "python3")
+ '(elpy-rpc-timeout 3)
+ '(elpy-syntax-check-command "python3 -m pyflakes")
  '(package-selected-packages
-   (quote
-    (haskell-emacs haskell-mode flower kotlin-mode docker flycheck-package package-lint clomacs pyenv-mode projectile ensime scala-mode plantuml-mode graphviz-dot-mode slime lfe-mode markdown-mode markdown-mode+ tagedit smex rainbow-delimiters quack py-yapf pos-tip paredit magit ipython idomenu ido-ubiquitous geiser exec-path-from-shell elpy company-jedi company-ansible company-anaconda clojure-mode-extra-font-locking cider)))
+   '(haskell-emacs haskell-mode flower kotlin-mode docker flycheck-package package-lint clomacs pyenv-mode projectile ensime scala-mode plantuml-mode graphviz-dot-mode slime lfe-mode markdown-mode markdown-mode+ tagedit smex rainbow-delimiters quack py-yapf pos-tip paredit magit ipython idomenu ido-ubiquitous geiser exec-path-from-shell elpy company-jedi company-ansible company-anaconda clojure-mode-extra-font-locking cider))
  '(plantuml-jar-path "/usr/share/java/plantuml.jar")
+ '(python-interactive t)
+ '(python-interactive-executable "/usr/bin/ipython3")
+ '(python-shell-interpreter "ipython3")
+ '(python-shell-interpreter-args "-i")
  '(safe-local-variable-values
-   (quote
-    ((cider-cljs-lein-repl . "(do (user/go) (user/cljs-repl))")
+   '((cider-cljs-lein-repl . "(do (user/go) (user/cljs-repl))")
      (cider-refresh-after-fn . "reloaded.repl/resume")
-     (cider-refresh-before-fn . "reloaded.repl/suspend")))))
+     (cider-refresh-before-fn . "reloaded.repl/suspend"))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
