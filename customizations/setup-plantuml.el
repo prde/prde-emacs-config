@@ -1,2 +1,3 @@
 (custom-set-variables
- '(plantuml-jar-path "/usr/share/java/plantuml.jar"))
+ '(plantuml-jar-path "~/.emacs.d/vendor/plantuml.jar")
+ '(plantuml-default-exec-mode 'jar))

@@ -23,7 +23,13 @@
 ;; manually with M-x package-install
 ;; Add in your own as you wish:
 (defvar my-packages
-  '(;; makes handling lisp expressions much, much easier
+  '(;; Markdown
+    markdown-mode
+
+    ;; Eclipse Integration
+    lsp-java
+
+    ;; makes handling lisp expressions much, much easier
     ;; Cheatsheet: http://www.emacswiki.org/emacs/PareditCheatsheet
     paredit
 
@@ -73,8 +79,6 @@
     ;; Python IDE
     elpy
 
-    ;; Scala IDE
-    ;; ensime
 ))
 
 ;; On OS X, an Emacs instance started from the graphical user
@@ -143,6 +147,7 @@
 (load "setup-lisp.el")
 (load "setup-clojure.el")
 (load "setup-haskell.el")
+(load "setup-java.el")
 (load "setup-js.el")
 (load "setup-latex.el")
 (load "setup-python.el")
@@ -163,11 +168,13 @@
  '(elpy-syntax-check-command "python3 -m pyflakes")
  '(package-selected-packages
    '(haskell-emacs haskell-mode flower kotlin-mode docker flycheck-package package-lint clomacs pyenv-mode projectile ensime scala-mode plantuml-mode graphviz-dot-mode slime lfe-mode markdown-mode markdown-mode+ tagedit smex rainbow-delimiters quack py-yapf pos-tip paredit magit ipython idomenu ido-ubiquitous geiser exec-path-from-shell elpy company-jedi company-ansible company-anaconda clojure-mode-extra-font-locking cider))
+ '(plantuml-default-exec-mode 'jar)
  '(plantuml-jar-path "/usr/share/java/plantuml.jar")
  '(python-interactive t)
  '(python-interactive-executable "/usr/bin/ipython3")
  '(python-shell-interpreter "ipython3")
- '(python-shell-interpreter-args "-i")
+ '(python-shell-interpreter-args
+   "--simple-prompt --pylab -c exec('__import__(\\'readline\\')') -i")
  '(safe-local-variable-values
    '((cider-cljs-lein-repl . "(do (user/go) (user/cljs-repl))")
      (cider-refresh-after-fn . "reloaded.repl/resume")
@@ -178,3 +185,10 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  )
+
+(put 'upcase-region 'disabled nil)
+(put 'downcase-region 'disabled nil)
+
+(unless (and (fboundp 'server-running-p)
+             (server-running-p))
+  (server-start))

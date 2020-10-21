@@ -16,3 +16,5 @@ customizations/setup-private.el
 tramp
 transient
 elpa
+ac-comphist.dat
+
